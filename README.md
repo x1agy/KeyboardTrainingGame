@@ -1,0 +1,1 @@
+quick game using redux and typescript
