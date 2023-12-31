@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import fishSlice from './text/textInputFiling';
-import modalSlice from './modalState/isModalOpen'
-import modalInfo from "./modalInfo/modalInfo";
+import modalInfoSlice from './modalInfo/modalInfo'
 
 export const store = configureStore({
     reducer: {
         fishText: fishSlice,
-        isModalOpen: modalSlice,
-        modalInfo: modalInfo,
+        modalInfo: modalInfoSlice,
     },
 });
 

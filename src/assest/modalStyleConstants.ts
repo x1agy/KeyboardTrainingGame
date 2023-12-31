@@ -1,0 +1,21 @@
+export const modalStyle = {
+    backgroundOpacityStyle:{
+        position:"absolute",
+        width:"100%",
+        height:"100%",
+        backgroundColor:"gray",
+        opacity:"70%",
+        zIndex:'5',
+    },
+    mainInfoContainerStyle:{
+        position:'absolute',
+        width:'800px',
+        height:'400px',
+        backgroundColor:'white',
+        display:'flex',
+        alignItems:'center',
+        flexDirection:'column',
+        opacity:'100%',
+        zIndex:'20'
+    }
+}

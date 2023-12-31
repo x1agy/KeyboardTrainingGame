@@ -1,21 +1,29 @@
 import React from "react";
 import './TextInputStyle.css'
 import { useDispatch } from "react-redux";
-import { setModalIsOpen } from "../../state/modalState/isModalOpen";
-import { addModalInfo } from "../../state/modalInfo/modalInfo";
+import { addCompleteTime, addSignsSpeed, addSignsCount, addTotalAccuracy, addFinalModalIsOpen } from "../../state/modalInfo/modalInfo";
 
 const TextInput: React.FC = () => {
+
     const [startText, setStartText] = React.useState<string>('');
     const [writenText, setWritenText] = React.useState<string>('');
-    const [msArray, setMsArray] = React.useState<any>([]);
-    const [inputTimer, setInputTimer] = React.useState(0);
+    const [msArray, setMsArray] = React.useState<number[]>([]);
+    const [inputTimer, setInputTimer] = React.useState<number>(0);
+    let signsCount = 0;
+    let missedSignsCount = 0;
+
     const dispatch = useDispatch()
 
     function fetchText(){
         if(startText.length === 0){
             setInputTimer(Date.now())
             setWritenText('')
-            dispatch(addModalInfo(undefined))
+
+            dispatch(addCompleteTime(undefined))
+            dispatch(addSignsSpeed(undefined))
+            dispatch(addSignsCount(undefined))
+            dispatch(addTotalAccuracy(undefined))
+
             fetch('https://fish-text.ru/get')
                 .then(data => data.json())
                 .then(data => setStartText(data.text))
@@ -25,6 +33,8 @@ const TextInput: React.FC = () => {
     function validateInputing( inputText: string){
         if(inputText === startText[0]){
             const newText = startText.slice(1)
+            signsCount++;
+            missedSignsCount++;
 
             setMsArray([...msArray, Date.now() - inputTimer])
             setStartText(newText)
@@ -32,19 +42,36 @@ const TextInput: React.FC = () => {
             setInputTimer(Date.now())
             
             if(startText.length === 1){
-                const time = msArray.reduce((accum: number, item: number) => accum += item, 0)
-                dispatch(setModalIsOpen(true))
-                dispatch(addModalInfo(time / 1000))
-
-                setMsArray([])
-                setWritenText('')
+                stopGame('Escape')
             }
         }
+        else{
+            missedSignsCount++;
+        }
     }
+
+    function stopGame(key: string){
+        if(key === 'Escape'){
+            const time = msArray.reduce((accum: number, item: number) => accum += item, 0)
+
+            dispatch(addCompleteTime(time / 1000))
+            dispatch(addSignsSpeed(signsCount / (time / 1000)))
+            dispatch(addSignsCount(signsCount))
+            dispatch(addTotalAccuracy(100 - (missedSignsCount * 100 / signsCount)))
+            dispatch(addFinalModalIsOpen(true))
+
+            setMsArray([])
+            setWritenText('')
+            setStartText('')
+            signsCount = 0;
+            missedSignsCount = 0;
+        }
+    }    
 
     return (
         <div
             className="textInputContainer"
+            onKeyUp={(e) => stopGame(e.key)}
         >
             <input 
                 type="text" 
