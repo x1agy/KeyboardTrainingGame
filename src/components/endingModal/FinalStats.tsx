@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
 import { modalStyle } from '../../assest/modalStyleConstants';
+import { addFinalModalIsOpen } from '../../state/modalInfo/modalInfo';
 
 const FinalStats = () => {
     const isOpen = useSelector((state: RootState) => state.modalInfo.isOpen);
@@ -29,12 +30,21 @@ const FinalStats = () => {
                 style={modalStyle.mainInfoContainerStyle}
             >
                 <h1>Результат</h1>
-                <table>
+                <table
+                    cellSpacing={15}
+                >
                     <tr>
-                        <td>completed time {completedTime}</td>
+                        <td>completed time {completedTime}s</td>
+                        <td>accuracy {totalAccuracy}%</td>
+                        <td>total signs {signsCount}</td>
+                        <td>signs per second {signsSpeed}</td>
                     </tr>
                 </table>
+                <button
+                    onClick={() => dispatch(addFinalModalIsOpen(false))}
+                >Начать с начала</button>
             </div>
+            
         </div>
     )
 }

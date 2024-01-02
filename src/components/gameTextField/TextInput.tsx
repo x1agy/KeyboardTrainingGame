@@ -9,8 +9,9 @@ const TextInput: React.FC = () => {
     const [writenText, setWritenText] = React.useState<string>('');
     const [msArray, setMsArray] = React.useState<number[]>([]);
     const [inputTimer, setInputTimer] = React.useState<number>(0);
-    let signsCount = 0;
-    let missedSignsCount = 0;
+    const [signsCount, setSignsCount] = React.useState<number>(0);
+    const [missedSignsCount, setMissedSignsCount] = React.useState<number>(0);
+    const [startDate, setStartDate] = React.useState<number>(0);
 
     const dispatch = useDispatch()
 
@@ -18,11 +19,7 @@ const TextInput: React.FC = () => {
         if(startText.length === 0){
             setInputTimer(Date.now())
             setWritenText('')
-
-            dispatch(addCompleteTime(undefined))
-            dispatch(addSignsSpeed(undefined))
-            dispatch(addSignsCount(undefined))
-            dispatch(addTotalAccuracy(undefined))
+            setStartDate(Date.now())
 
             fetch('https://fish-text.ru/get')
                 .then(data => data.json())
@@ -33,8 +30,7 @@ const TextInput: React.FC = () => {
     function validateInputing( inputText: string){
         if(inputText === startText[0]){
             const newText = startText.slice(1)
-            signsCount++;
-            missedSignsCount++;
+            setSignsCount(prev => prev + 1)
 
             setMsArray([...msArray, Date.now() - inputTimer])
             setStartText(newText)
@@ -46,7 +42,7 @@ const TextInput: React.FC = () => {
             }
         }
         else{
-            missedSignsCount++;
+            setMissedSignsCount(prev => prev + 1)
         }
     }
 
@@ -54,17 +50,19 @@ const TextInput: React.FC = () => {
         if(key === 'Escape'){
             const time = msArray.reduce((accum: number, item: number) => accum += item, 0)
 
-            dispatch(addCompleteTime(time / 1000))
-            dispatch(addSignsSpeed(signsCount / (time / 1000)))
+            dispatch(addCompleteTime((Date.now() - startDate) / 1000))
+            // zero if signsCount === 0 else value
+            dispatch(addSignsSpeed(Math.floor(signsCount ? (signsCount / (time / 1000)) : 0)))
             dispatch(addSignsCount(signsCount))
-            dispatch(addTotalAccuracy(100 - (missedSignsCount * 100 / signsCount)))
+            // zeri if signsCount === 0 else value
+            dispatch(addTotalAccuracy(Math.floor(signsCount ? (100 - (missedSignsCount * 100 / signsCount)) : 0)))
             dispatch(addFinalModalIsOpen(true))
 
             setMsArray([])
             setWritenText('')
             setStartText('')
-            signsCount = 0;
-            missedSignsCount = 0;
+            setSignsCount(0)
+            setMissedSignsCount(0)
         }
     }    
 
@@ -77,6 +75,7 @@ const TextInput: React.FC = () => {
                 type="text" 
                 className="writenText"
                 disabled
+                readOnly
                 value={writenText}
             />
             <div
@@ -86,6 +85,7 @@ const TextInput: React.FC = () => {
                     type="text" 
                     placeholder='Нажмите что бы начать' 
                     className="textInput"
+                    readOnly
                     value={startText}
                 />
 

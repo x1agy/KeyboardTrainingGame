@@ -4,7 +4,6 @@ import './assest/style.css'
 import FinalStats from './components/endingModal/FinalStats';
 
 function App() {
-  // ASDASDASD
   return (
     <div className="App"
     >
